@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(uuid())
+  username   String    @unique @db.VarChar(10)
+  name       String    @db.VarChar(255)
+  email      String    @unique @db.VarChar(20)
+  password   String    @db.VarChar(20)
+  phone      String    @unique @db.VarChar(20)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  address    Address[]
+  wallet     Wallet?
+  order      Order[]
+  review     Review[]
+}
+
+model Address {
+  id       String @id
+  street   String @db.VarChar(255)
+  city     String @db.VarChar(20)
+  state    String @db.VarChar(20)
+  zip_code String @db.VarChar(10)
+  country  String @db.VarChar(20)
+  user     User   @relation(fields: [user_id], references: [id])
+  user_id  String
+}
+
+model Wallet {
+  id      String  @id @default(uuid())
+  balance Decimal @db.Decimal(10, 2)
+  user    User    @relation(fields: [user_id], references: [id])
+  user_id String  @unique
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  title       String      @db.VarChar(255)
+  description String      @db.Text
+  image       String      @db.Text
+  price       Decimal     @db.Decimal(10, 2)
+  stock       Int         @default(0)
+  category    Category    @relation(fields: [category_id], references: [id])
+  category_id Int
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+  order_item  OrderItem[]
+  review      Review[]
+}
+
+model Category {
+  id      Int       @id @default(autoincrement())
+  name    String    @db.VarChar(20)
+  product Product[]
+}
+
+model Order {
+  id           String      @id @default(uuid())
+  total_amount Decimal     @db.Decimal(10, 2)
+  status       String      @db.VarChar(20)
+  item         OrderItem[]
+  user         User        @relation(fields: [user_id], references: [id])
+  user_id      String
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  quantity   Int
+  price      Decimal
+  order      Order   @relation(fields: [order_id], references: [id])
+  order_id   String
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id String
+}
+
+model Review {
+  id         Int     @id @default(autoincrement())
+  rating     Decimal
+  comment    String? @db.Text
+  user       User    @relation(fields: [user_id], references: [id])
+  user_id    String
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id String
+}
