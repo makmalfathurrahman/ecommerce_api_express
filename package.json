@@ -12,7 +12,7 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "description": "To install dependencies:",
+  "description": "API for e-commerce",
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
